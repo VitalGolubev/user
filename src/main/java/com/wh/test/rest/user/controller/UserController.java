@@ -43,6 +43,12 @@ public class UserController {
         return new ResponseEntity<>(userService.findAll(), HttpStatus.OK);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<User> findById(@PathVariable(value = "id") @NotNull @Positive Integer id) {
+        return new ResponseEntity<>(userService.findById(id).orElseThrow(() -> new NoSuchElementException("Failed: " +
+                "User with ID=" + id + "not found")), HttpStatus.OK);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<User>> findByBirthday(
             @NotNull @DateTimeFormat(pattern = "yyyy-MM-dd")

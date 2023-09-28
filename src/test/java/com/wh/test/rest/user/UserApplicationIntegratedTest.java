@@ -9,7 +9,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -17,6 +24,8 @@ import java.util.NoSuchElementException;
 
 import static com.wh.test.rest.user.generator.UserGenerator.generateUsers;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -26,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 class UserApplicationIntegratedTest {
     @Autowired
@@ -38,6 +47,12 @@ class UserApplicationIntegratedTest {
     @Autowired
     ObjectMapper objectMapper;
 
+    @Autowired
+    TestRestTemplate restTemplate;
+
+    @LocalServerPort
+    private int port;
+
     @BeforeEach
     void createUsers() {
         generateUsers(10).forEach(u -> userService.create(u));
@@ -46,7 +61,21 @@ class UserApplicationIntegratedTest {
     @AfterEach
     void clearUsers() {
         userService.findAll().forEach(u -> userService.delete(u));
+    }
 
+    @Test
+    void testEndpoint() {
+        String url = "http://127.0.0.1:" + port + "/api/users/{id}";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        ResponseEntity<User> response = restTemplate
+                .exchange(url, HttpMethod.GET, new HttpEntity<>(headers), User.class, "1");
+
+        User user = response.getBody();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(user);
+        assertEquals(1, user.getId());
     }
 
     @Test
