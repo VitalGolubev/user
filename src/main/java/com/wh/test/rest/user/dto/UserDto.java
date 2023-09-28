@@ -1,4 +1,4 @@
-package com.wh.test.rest.user.request;
+package com.wh.test.rest.user.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -11,7 +11,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class UserRequest {
+public class UserDto {
     String firstName;
 
     String lastName;

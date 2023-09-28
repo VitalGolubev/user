@@ -11,13 +11,11 @@ public interface UserRepository {
 
     Optional<User> findById(int id);
 
-    void create(User user);
+    User create(User user);
 
-    Integer generateId();
+    User update(User user);
 
-    void update(User user);
-
-    void delete(User user);
+    boolean delete(User user);
 
     List<User> findByBirthday(LocalDate from, LocalDate to);
 }

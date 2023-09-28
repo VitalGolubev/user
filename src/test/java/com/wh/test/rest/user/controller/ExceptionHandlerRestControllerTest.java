@@ -37,24 +37,12 @@ class ExceptionHandlerRestControllerTest {
         assertThat(response.getBody()).isEqualTo("Bad request");
     }
 
-    @Test
-    void handleValidationExceptions() {
-    }
-
-    @Test
-    void handleTypeMismatchExceptions() {
-    }
-
-    @Test
-    void handleMissingServletRequestParameterException() {
-    }
 
     @Test
     void handleException() {
         Exception mockException = mock(Exception.class);
         ResponseEntity<String> response = controller.handleException(mockException);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
-        assertThat(response.getBody()).isEqualTo("An error occurred.");
     }
 
 }

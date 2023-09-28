@@ -15,7 +15,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> findAll() {
-        return list;
+        return List.copyOf(list);
     }
 
     @Override
@@ -23,36 +23,38 @@ public class UserRepositoryImpl implements UserRepository {
         if (id < 1 || id > list.size()) {
             return Optional.empty();
         }
-        return Optional.of(list.get(id - 1));
+        return Optional.of(list.get(id - 1).toBuilder().build());
     }
 
     @Override
-    public void create(User user) {
-        list.add(user);
+    public User create(User user) {
+        user.setId(generateId());
+        list.add(user.toBuilder().build());
+        return user;
     }
 
-    @Override
     public Integer generateId() {
         return list.size() + 1;
     }
 
     @Override
-    public void update(User user) {
+    public User update(User user) {
         if (findById(user.getId()).isEmpty()) {
             throw new IllegalArgumentException("User with given ID=" + user.getId() + " doesn't exist");
         }
-        list.set(user.getId() - 1, user);
+        list.set(user.getId() - 1, user.toBuilder().build());
+        return user;
     }
 
     @Override
-    public void delete(User user) {
-        list.remove(user);
+    public boolean delete(User user) {
+        return list.remove(user);
     }
 
     @Override
     public List<User> findByBirthday(LocalDate from, LocalDate to) {
-        return list.stream()
+        return List.copyOf(list.stream()
                 .filter(u -> u.getBirthday().isAfter(from) && u.getBirthday().isBefore(to))
-                .toList();
+                .toList());
     }
 }

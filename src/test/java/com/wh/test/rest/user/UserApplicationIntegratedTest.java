@@ -1,27 +1,23 @@
-package com.wh.test.rest.user.controller;
+package com.wh.test.rest.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wh.test.rest.user.entity.User;
 import com.wh.test.rest.user.service.UserService;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.time.LocalDate;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import static com.wh.test.rest.user.generator.UserGenerator.generateUsers;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -29,21 +25,32 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserControllerTest {
+class UserApplicationIntegratedTest {
     @Autowired
     MockMvc mockMvc;
 
-    @MockBean
+    @Autowired
     UserService userService;
 
     @Autowired
     ObjectMapper objectMapper;
 
+    @BeforeEach
+    void createUsers() {
+        generateUsers(10).forEach(u -> userService.create(u));
+    }
+
+    @AfterEach
+    void clearUsers() {
+        userService.findAll().forEach(u -> userService.delete(u));
+
+    }
+
     @Test
     void findAll() throws Exception {
-        when(userService.findAll()).thenReturn(generateUsers(10));
         mockMvc.perform(get("/api/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(10)))
@@ -55,8 +62,6 @@ class UserControllerTest {
 
     @Test
     void findByBirthday() throws Exception {
-        when(userService.findByBirthday(LocalDate.of(1999, 12, 31), LocalDate.of(2005, 1, 2)))
-                .thenReturn(generateUsers(6));
         mockMvc.perform(get("/api/users/search?from=1999-12-31&to=2005-01-02"))
                 .andExpect(status().isFound())
                 .andExpect(jsonPath("$", hasSize(6)))
@@ -70,12 +75,11 @@ class UserControllerTest {
     @Test
     void create() throws Exception {
         User user = generateUsers(1).get(0);
-        when(userService.create(any(User.class))).thenReturn(user);
         mockMvc.perform(post("/api/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(11))
                 .andExpect(jsonPath("$.firstName").value("f0"))
                 .andExpect(jsonPath("$.lastName").value("l0"))
                 .andExpect(jsonPath("$.email").value("email0@gmail.com"));
@@ -83,13 +87,7 @@ class UserControllerTest {
 
     @Test
     void partialUpdateOneParameter() throws Exception {
-        when(userService.findById(1))
-                .thenReturn(Optional.of(generateUsers(1).get(0)));
-        when(userService.update(any(User.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-
         String requestBody = "{\"firstName\": \"uf1\"}";
-
         mockMvc.perform(patch("/api/users/{id}", 1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
@@ -106,9 +104,6 @@ class UserControllerTest {
         user.setFirstName("newF0");
         user.setLastName("newL0");
         user.setEmail("new_email0@gmail.com");
-        when(userService.findById(1)).thenReturn(Optional.of(user));
-        when(userService.update(any(User.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
         mockMvc.perform(put("/api/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user)))
@@ -121,12 +116,10 @@ class UserControllerTest {
 
     @Test
     void delete() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/1"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/12"))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof NoSuchElementException));
 
-        when(userService.findById(1)).thenReturn(Optional.of(generateUsers(1).get(0)));
-        doNothing().when(userService).delete(any(User.class));
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/1"))
                 .andExpect(status().isNoContent());
     }

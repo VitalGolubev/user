@@ -1,29 +1,29 @@
 package com.wh.test.rest.user.mapper;
 
 import com.wh.test.rest.user.entity.User;
-import com.wh.test.rest.user.request.UserRequest;
+import com.wh.test.rest.user.dto.UserDto;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
-    public User partialUpdate(UserRequest userRequest, User user) {
-        if (userRequest.getFirstName() != null && !userRequest.getFirstName().isEmpty()) {
-            user.setFirstName(userRequest.getFirstName());
+    public User partialUpdate(UserDto userDto, User user) {
+        if (userDto.getFirstName() != null && !userDto.getFirstName().isEmpty()) {
+            user.setFirstName(userDto.getFirstName());
         }
-        if (userRequest.getLastName() != null && !userRequest.getLastName().isEmpty()) {
-            user.setLastName(userRequest.getLastName());
+        if (userDto.getLastName() != null && !userDto.getLastName().isEmpty()) {
+            user.setLastName(userDto.getLastName());
         }
-        if (userRequest.getEmail() != null && !userRequest.getEmail().isEmpty()) {
-            user.setEmail(userRequest.getEmail());
+        if (userDto.getEmail() != null && !userDto.getEmail().isEmpty()) {
+            user.setEmail(userDto.getEmail());
         }
-        if (userRequest.getBirthday() != null) {
-            user.setBirthday(userRequest.getBirthday());
+        if (userDto.getBirthday() != null) {
+            user.setBirthday(userDto.getBirthday());
         }
-        if (userRequest.getAddress() != null) {
-            user.setAddress(userRequest.getAddress());
+        if (userDto.getAddress() != null) {
+            user.setAddress(userDto.getAddress());
         }
-        if (userRequest.getPhone() != null) {
-            user.setPhone(userRequest.getPhone());
+        if (userDto.getPhone() != null) {
+            user.setPhone(userDto.getPhone());
         }
 
         return user;

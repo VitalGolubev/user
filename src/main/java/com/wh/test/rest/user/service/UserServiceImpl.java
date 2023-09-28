@@ -17,15 +17,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User create(User user) {
-        user.setId(repository.generateId());
-        repository.create(user);
-        return user;
+        return repository.create(user);
     }
 
     @Override
     public User update(User user) {
-        repository.update(user);
-        return user;
+        return repository.update(user);
     }
 
     @Override

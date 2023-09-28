@@ -10,12 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.wh.test.rest.user.generator.UserGenerator.generateUsers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,7 +26,7 @@ class UserRepositoryTest {
 
     @AfterEach
     void clearRepository() {
-        repository.findAll().clear();
+        repository.findAll().forEach(u -> repository.delete(u));
     }
 
     @ParameterizedTest
@@ -114,15 +112,4 @@ class UserRepositoryTest {
                 Arguments.of(generateUsers(6), 6));
     }
 
-    private static List<User> generateUsers(int count) {
-        return IntStream.range(0, count)
-                .mapToObj(i -> buildUser(i + 1, "f" + i, "l" + i, "email" + i + "@gmail.com", "01.01.200" + i))
-                .collect(Collectors.toList());
-    }
-
-    public static User buildUser(int id, String firstName, String lastName, String email, String birthday) {
-        return User.builder().id(id).firstName(firstName).lastName(lastName).email(email)
-                .birthday(LocalDate.parse(birthday, DateTimeFormatter.ofPattern("dd.MM.yyyy")))
-                .build();
-    }
 }

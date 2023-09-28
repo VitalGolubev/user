@@ -2,7 +2,7 @@ package com.wh.test.rest.user.controller;
 
 import com.wh.test.rest.user.entity.User;
 import com.wh.test.rest.user.mapper.UserMapper;
-import com.wh.test.rest.user.request.UserRequest;
+import com.wh.test.rest.user.dto.UserDto;
 import com.wh.test.rest.user.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -61,7 +61,7 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<User> partialUpdate(@PathVariable(value = "id") @Positive Integer id,
-                                           @RequestBody UserRequest userUpdated) {
+                                           @RequestBody UserDto userUpdated) {
         User user = userService.findById(id).orElseThrow(
                 () -> new NoSuchElementException("User with given ID=" + id + " not found"));
         userMapper.partialUpdate(userUpdated, user);
