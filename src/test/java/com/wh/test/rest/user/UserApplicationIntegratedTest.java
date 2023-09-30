@@ -112,6 +112,7 @@ class UserApplicationIntegratedTest {
                 .andExpect(jsonPath("$.firstName").value("f0"))
                 .andExpect(jsonPath("$.lastName").value("l0"))
                 .andExpect(jsonPath("$.email").value("email0@gmail.com"));
+        assertEquals(11, userService.findAll().size());
     }
 
     @Test
@@ -125,6 +126,8 @@ class UserApplicationIntegratedTest {
                 .andExpect(jsonPath("$.firstName").value("uf1"))
                 .andExpect(jsonPath("$.lastName").value("l0"))
                 .andExpect(jsonPath("$.email").value("email0@gmail.com"));
+
+        assertEquals("uf1", userService.findById(1).orElseThrow().getFirstName());
     }
 
     @Test
@@ -141,6 +144,8 @@ class UserApplicationIntegratedTest {
                 .andExpect(jsonPath("$.firstName").value("newF0"))
                 .andExpect(jsonPath("$.lastName").value("newL0"))
                 .andExpect(jsonPath("$.email").value("new_email0@gmail.com"));
+        User updatedUser = userService.findById(1).orElseThrow();
+        assertEquals(user, updatedUser);
     }
 
     @Test
@@ -151,6 +156,7 @@ class UserApplicationIntegratedTest {
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/api/users/1"))
                 .andExpect(status().isNoContent());
+
     }
 
 }
