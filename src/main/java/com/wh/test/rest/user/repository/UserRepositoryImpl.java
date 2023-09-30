@@ -4,37 +4,38 @@ import com.wh.test.rest.user.entity.User;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Repository
 public class UserRepositoryImpl implements UserRepository {
-
-    List<User> list = new ArrayList<>();
+    Map<Integer, User> map = new HashMap<>();
 
     @Override
     public List<User> findAll() {
-        return List.copyOf(list);
+        return List.copyOf(map.values());
     }
 
     @Override
     public Optional<User> findById(int id) {
-        if (id < 1 || id > list.size()) {
-            return Optional.empty();
-        }
-        return Optional.of(list.get(id - 1).toBuilder().build());
+        return Optional.ofNullable(map.get(id));
     }
 
     @Override
     public User create(User user) {
         user.setId(generateId());
-        list.add(user.toBuilder().build());
+        map.put(user.getId(), user.toBuilder().build());
         return user;
     }
 
     public Integer generateId() {
-        return list.size() + 1;
+        int i = map.size() + 1;
+        while (findById(i).isPresent()) {
+            i++;
+        }
+        return i;
     }
 
     @Override
@@ -42,18 +43,18 @@ public class UserRepositoryImpl implements UserRepository {
         if (findById(user.getId()).isEmpty()) {
             throw new IllegalArgumentException("User with given ID=" + user.getId() + " doesn't exist");
         }
-        list.set(user.getId() - 1, user.toBuilder().build());
+        map.put(user.getId(), user.toBuilder().build());
         return user;
     }
 
     @Override
     public boolean delete(User user) {
-        return list.remove(user);
+        return map.remove(user.getId(), user);
     }
 
     @Override
     public List<User> findByBirthday(LocalDate from, LocalDate to) {
-        return List.copyOf(list.stream()
+        return List.copyOf(map.values().stream()
                 .filter(u -> u.getBirthday().isAfter(from) && u.getBirthday().isBefore(to))
                 .toList());
     }
